@@ -3,7 +3,7 @@ var crypto = require('crypto');
 var secret = 'sk_test_104e2d6712930262f6f9b61b824459b84a2268b6';//process.env.SECRET_KEY;
 const express = require('express')
 const bodyParser = require('body-parser');
-const port = 8080
+const port = 80
 var app = express();
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
