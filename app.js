@@ -73,25 +73,34 @@ app.post("/webhook/paystack", function(req, res) {
     console.log('Hooking...2', hash)
     if (hash == req.headers['x-paystack-signature']) {
         console.log('Hooking...3')
-        if(json.event === 'charge.success'){
+        if(json.event == 'charge.success'){
             ;(async function() {
                 const reference = json.data.reference
                 const response = await db.getTransactionByReference(reference);
+                console.log('Fetting Trans...', reference, response.rows[0])
                 if(response.rows){
+                    console.log('Fetting Trans...1')
                     const transaction = response.rows[0];
                     if(transaction.buddie_id !== null){
+                        console.log('Fetting Trans...2')
                         const target = 'buddie';
                         const buddieID = transaction.buddie_id;
                         try{
                             let savings = await db.getTotalSavings(target, buddieID);
+                            console.log('Fetting Trans...3')
                             let withdrawal = await db.getTotalWithdrawal(target, buddieID);
+                            console.log('Fetting Trans...4')
                             let interest = await db.getTotalInterest(target, buddieID);
+                            console.log('Fetting Trans...5')
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                            console.log('Fetting Trans...6')
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                            console.log('Fetting Trans...7')
                             console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
                             await db.updateSaving(target, buddieID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
+                            console.log('Fetting Trans...8')
                             res.sendStatus(200);
                         }catch(error){
                             console.log('Buddie Error: ', error)
