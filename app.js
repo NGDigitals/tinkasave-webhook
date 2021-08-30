@@ -68,7 +68,7 @@ console.log('Welcome to Webhook')
 // Using Express
 app.post("/webhook/paystack", function(req, res) {
     const json = req.body;
-    console.log('Hooking...1', json.event)
+    console.log('Hooking...1', json.event, (json.event === 'charge.success'))
     var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
     console.log('Hooking...2', hash)
     if (hash == req.headers['x-paystack-signature']) {
