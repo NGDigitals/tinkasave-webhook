@@ -75,9 +75,10 @@ app.post("/webhook/paystack", async (req, res) => {
         console.log('Hooking...3')
         if(json.event == 'charge.success'){
             // ;(async function() {
+            try{
                 console.log('Starting...')
                 const reference = json.data.reference
-                const response = await db.getTransactionByReference(reference).catch(e => { console.log('Reference', e) });
+                const response = await db.getTransactionByReference(reference);
                 console.log('Fetting Trans...', reference, response.rows[0])
                 if(response.rows){
                     console.log('Fetting Trans...1')
@@ -86,89 +87,76 @@ app.post("/webhook/paystack", async (req, res) => {
                         console.log('Fetting Trans...2')
                         const target = 'buddie';
                         const buddieID = transaction.buddie_id;
-                        try{
-                            let savings = await db.getTotalSavings(target, buddieID);
-                            console.log('Fetting Trans...3')
-                            let withdrawal = await db.getTotalWithdrawal(target, buddieID);
-                            console.log('Fetting Trans...4')
-                            let interest = await db.getTotalInterest(target, buddieID);
-                            console.log('Fetting Trans...5')
-                            let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            console.log('Fetting Trans...6')
-                            let balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            console.log('Fetting Trans...7')
-                            console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
-                            await db.updateSaving(target, buddieID, totalSavings, balance);
-                            await db.updateTransaction(transaction.id, 'Completed');
-                            console.log('Fetting Trans...8')
-                            res.sendStatus(200);
-                        }catch(error){
-                            console.log('Buddie Error: ', error)
-                        }
+                        let savings = await db.getTotalSavings(target, buddieID);
+                        console.log('Fetting Trans...3')
+                        let withdrawal = await db.getTotalWithdrawal(target, buddieID);
+                        console.log('Fetting Trans...4')
+                        let interest = await db.getTotalInterest(target, buddieID);
+                        console.log('Fetting Trans...5')
+                        let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                        console.log('Fetting Trans...6')
+                        let balance = (totalSavings + (interest.rows[0].sum !== null ? 
+                                interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        console.log('Fetting Trans...7')
+                        console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
+                        await db.updateSaving(target, buddieID, totalSavings, balance);
+                        await db.updateTransaction(transaction.id, 'Completed');
+                        console.log('Fetting Trans...8')
+                        res.sendStatus(200);
                     }else if(transaction.group_id !== null){
                         let target = 'member';
                         const memberID = transaction.member_id;
-                        try{
-                            let savings = await db.getTotalSavings(target, memberID);
-                            let withdrawal = await db.getTotalWithdrawal(target, memberID);
-                            let interest = await db.getTotalInterest(target, memberID);
-                            let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            let balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
-                            await db.updateSaving(target, memberID, totalSavings, balance);
-                            target = 'group';
-                            const groupID = transaction.group_id;
-                            savings = await db.getTotalSavings(target, groupID);
-                            withdrawal = await db.getTotalWithdrawal(target, groupID);
-                            interest = await db.getTotalInterest(target, groupID);
-                            totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
-                            await db.updateSaving(target, groupID, totalSavings, balance);
-                            await db.updateTransaction(transaction.id, 'Completed');
-                            res.sendStatus(200);
-                        }catch(error){
-                            console.log('Buddie Error: ', error)
-                        }
+                        let savings = await db.getTotalSavings(target, memberID);
+                        let withdrawal = await db.getTotalWithdrawal(target, memberID);
+                        let interest = await db.getTotalInterest(target, memberID);
+                        let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                        let balance = (totalSavings + (interest.rows[0].sum !== null ? 
+                                interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
+                        await db.updateSaving(target, memberID, totalSavings, balance);
+                        target = 'group';
+                        const groupID = transaction.group_id;
+                        savings = await db.getTotalSavings(target, groupID);
+                        withdrawal = await db.getTotalWithdrawal(target, groupID);
+                        interest = await db.getTotalInterest(target, groupID);
+                        totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                        balance = (totalSavings + (interest.rows[0].sum !== null ? 
+                                interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
+                        await db.updateSaving(target, groupID, totalSavings, balance);
+                        await db.updateTransaction(transaction.id, 'Completed');
+                        res.sendStatus(200);
                     }else if(transaction.smooth_id !== null){
                         const target = 'smooth';
                         const smoothID = transaction.smooth_id;
-                        try{
-                            let savings = await db.getTotalSavings(target, smoothID);
-                            let withdrawal = await db.getTotalWithdrawal(target, smoothID);
-                            let interest = await db.getTotalInterest(target, smoothID);
-                            let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            let balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
-                            await db.updateSaving(target, smoothID, totalSavings, balance);
-                            await db.updateTransaction(transaction.id, 'Completed');
-                            res.sendStatus(200);
-                        }catch(error){
-                            console.log('Buddie Error: ', error)
-                        }
+                        let savings = await db.getTotalSavings(target, smoothID);
+                        let withdrawal = await db.getTotalWithdrawal(target, smoothID);
+                        let interest = await db.getTotalInterest(target, smoothID);
+                        let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                        let balance = (totalSavings + (interest.rows[0].sum !== null ? 
+                                interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
+                        await db.updateSaving(target, smoothID, totalSavings, balance);
+                        await db.updateTransaction(transaction.id, 'Completed');
+                        res.sendStatus(200);
                     }else if(transaction.kid_id !== null){
                         const target = 'kid';
                         const kidID = transaction.kid_id;
-                        try{
-                            let savings = await db.getTotalSavings(target, kidID);
-                            let withdrawal = await db.getTotalWithdrawal(target, kidID);
-                            let interest = await db.getTotalInterest(target, kidID);
-                            let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            let balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
-                            await db.updateSaving(target, kidID, totalSavings, balance);
-                            await db.updateTransaction(transaction.id, 'Completed');
-                            res.sendStatus(200);
-                        }catch(error){
-                            console.log('Buddie Error: ', error)
-                        }
+                        let savings = await db.getTotalSavings(target, kidID);
+                        let withdrawal = await db.getTotalWithdrawal(target, kidID);
+                        let interest = await db.getTotalInterest(target, kidID);
+                        let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                        let balance = (totalSavings + (interest.rows[0].sum !== null ? 
+                                interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
+                        await db.updateSaving(target, kidID, totalSavings, balance);
+                        await db.updateTransaction(transaction.id, 'Completed');
+                        res.sendStatus(200);
                     }
                 }
+            }catch(error){
+                console.log('All Error: ', error)
+            }
             // })()
         }
     }
