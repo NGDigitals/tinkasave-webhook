@@ -1,5 +1,5 @@
 const Pool = require('pg').Pool
-const ENV = 'dev'
+const ENV = 'test'
 const pool = ENV === 'prod' ? new Pool({
   user: 'DevMaster',
   host: 'ec2-18-217-115-210.us-east-2.compute.amazonaws.com',
