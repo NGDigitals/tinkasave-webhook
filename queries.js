@@ -43,22 +43,6 @@ const updateSaving = async (target, ID, savings, balance) => {
   return pool.query('UPDATE ' + target + 's SET total_savings = $2, balance = $3 WHERE id = $1', [ID, savings, balance]);
 }
 
-// const getTotalGroupSavings = async (ID) => {
-//   return pool.query('SELECT SUM(amount) FROM transactions WHERE group_id = $1 AND status = \'Completed\' AND amount > 0', [ID]);
-// }
-
-// const getTotalGroupWithdrawal = async (ID) => {
-//   return pool.query('SELECT SUM(amount) FROM transactions WHERE group_id = $1 AND status = \'Completed\' AND amount < 0', [ID]);
-// }
-
-// const getTotalGroupInterest = async (ID) => {
-//   return pool.query('SELECT SUM(amount) FROM interests WHERE group_id = $1', [ID]);
-// }
-
-// const updateGroup = async (ID, savings, balance) => {
-//   return pool.query('UPDATE groups SET total_savings = $2, balance = $3 WHERE id = $1', [ID, savings, balance]);
-// }
-
 const updateTransaction = async (ID, status) => {
   return pool.query('UPDATE transactions SET status = $2 WHERE id = $1', [ID, status]);
 }
@@ -107,9 +91,5 @@ module.exports = {
   getTotalInterest,
   getTotalWithdrawal,
   updateSaving,
-  // getTotalGroupSavings,
-  // getTotalGroupInterest,
-  // getTotalGroupWithdrawal,
-  // updateGroup,
   updateTransaction,
 }
