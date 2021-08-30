@@ -7,7 +7,7 @@ const port = 8080
 var app = express();
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
-
+console.log('Welcome to Webhook')
 // var json = {
 //         event: 'charge.success',
 //         data: {
