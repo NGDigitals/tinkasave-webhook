@@ -75,8 +75,9 @@ app.post("/webhook/paystack", async (req, res) => {
         console.log('Hooking...3')
         if(json.event == 'charge.success'){
             // ;(async function() {
+                console.log('Starting...')
                 const reference = json.data.reference
-                const response = await db.getTransactionByReference(reference);
+                const response = await db.getTransactionByReference(reference).catch(e => { console.log('Reference', e) });
                 console.log('Fetting Trans...', reference, response.rows[0])
                 if(response.rows){
                     console.log('Fetting Trans...1')
