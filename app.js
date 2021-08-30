@@ -93,6 +93,7 @@ app.post("/webhook/paystack", function(req, res) {
                     console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
                     await db.updateSaving(target, buddieID, totalSavings, balance);
                     await db.updateTransaction(transaction.id, 'Completed');
+                    res.sendStatus(200);
                 }else if(transaction.group_id !== null){
                     let target = 'member';
                     const memberID = transaction.member_id;
@@ -115,6 +116,7 @@ app.post("/webhook/paystack", function(req, res) {
                     console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
                     await db.updateSaving(target, groupID, totalSavings, balance);
                     await db.updateTransaction(transaction.id, 'Completed');
+                    res.sendStatus(200);
                 }else if(transaction.smooth_id !== null){
                     const target = 'smooth';
                     const smoothID = transaction.smooth_id;
@@ -127,6 +129,7 @@ app.post("/webhook/paystack", function(req, res) {
                     console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
                     await db.updateSaving(target, smoothID, totalSavings, balance);
                     await db.updateTransaction(transaction.id, 'Completed');
+                    res.sendStatus(200);
                 }else if(transaction.kid_id !== null){
                     const target = 'kid';
                     const kidID = transaction.kid_id;
@@ -139,13 +142,13 @@ app.post("/webhook/paystack", function(req, res) {
                     console.log(target, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, totalSavings, balance)
                     await db.updateSaving(target, kidID, totalSavings, balance);
                     await db.updateTransaction(transaction.id, 'Completed');
+                    res.sendStatus(200);
                 }
             }
         })()
     }else{
         console.log('Done', json.event)
     }
-    res.sendStatus(200);
 });
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
