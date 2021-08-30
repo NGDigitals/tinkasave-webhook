@@ -2,16 +2,16 @@ const Pool = require('pg').Pool
 const ENV = 'test'
 const pool = ENV === 'prod' ? new Pool({
   user: 'DevMaster',
-  host: 'ec2-18-217-115-210.us-east-2.compute.amazonaws.com',
+  host: 'tinkasave.cgmthkmsj5zb.eu-west-2.rds.amazonaws.com',
   database: 'tinkasave',
   password: 'Cistern#_1',
-  port: 6432,
+  port: 5432,
 }) : (ENV === 'test' ? new Pool({
   user: 'DevMaster',
-  host: 'ec2-18-217-115-210.us-east-2.compute.amazonaws.com',
+  host: 'tinkasave.cgmthkmsj5zb.eu-west-2.rds.amazonaws.com',
   database: 'tinkasave',
   password: 'Cistern#_1',
-  port: 6432,
+  port: 5432,
 }) : new Pool({
   user: 'postgres',
   host: 'localhost',
