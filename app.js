@@ -66,7 +66,7 @@ console.log('Welcome to Webhook')
 //         business_name: 'TinkaSave'
 //     };
 // Using Express
-app.post("/webhook/paystack", function(req, res) {
+app.post("/webhook/paystack", async (req, res) => {
     const json = req.body;
     console.log('Hooking...1', json.event, (json.event == 'charge.success'), (json.event === 'charge.success'))
     var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
@@ -74,7 +74,7 @@ app.post("/webhook/paystack", function(req, res) {
     if (hash == req.headers['x-paystack-signature']) {
         console.log('Hooking...3')
         if(json.event == 'charge.success'){
-            ;(async function() {
+            // ;(async function() {
                 const reference = json.data.reference
                 const response = await db.getTransactionByReference(reference);
                 console.log('Fetting Trans...', reference, response.rows[0])
@@ -168,7 +168,7 @@ app.post("/webhook/paystack", function(req, res) {
                         }
                     }
                 }
-            })()
+            // })()
         }
     }
 });
