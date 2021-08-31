@@ -1,6 +1,6 @@
-const db = require('./queries');
 var crypto = require('crypto');
 var secret = 'sk_test_104e2d6712930262f6f9b61b824459b84a2268b6';//process.env.SECRET_KEY;
+const db = require('./connection');
 const express = require('express')
 const bodyParser = require('body-parser');
 const port = 8080
@@ -26,8 +26,10 @@ app.post("/webhook/paystack", async (req, res) => {
                         let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                         let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                 interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        await db.beginTransaction();
                         await db.updateSaving(target, buddieID, totalSavings, balance);
                         await db.updateTransaction(transaction.id, 'Completed');
+                        await db.commitTransaction();
                         res.sendStatus(200);
                     }else if(transaction.group_id !== null){
                         let target = 'member';
@@ -38,6 +40,7 @@ app.post("/webhook/paystack", async (req, res) => {
                         let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                         let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                 interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        await db.beginTransaction();
                         await db.updateSaving(target, memberID, totalSavings, balance);
                         target = 'group';
                         const groupID = transaction.group_id;
@@ -49,6 +52,7 @@ app.post("/webhook/paystack", async (req, res) => {
                                 interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
                         await db.updateSaving(target, groupID, totalSavings, balance);
                         await db.updateTransaction(transaction.id, 'Completed');
+                        await db.commitTransaction();
                         res.sendStatus(200);
                     }else if(transaction.smooth_id !== null){
                         const target = 'smooth';
@@ -59,8 +63,10 @@ app.post("/webhook/paystack", async (req, res) => {
                         let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                         let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                 interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        await db.beginTransaction();      
                         await db.updateSaving(target, smoothID, totalSavings, balance);
                         await db.updateTransaction(transaction.id, 'Completed');
+                        await db.commitTransaction();
                         res.sendStatus(200);
                     }else if(transaction.kid_id !== null){
                         const target = 'kid';
@@ -71,14 +77,21 @@ app.post("/webhook/paystack", async (req, res) => {
                         let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                         let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                 interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                        await db.beginTransaction();
                         await db.updateSaving(target, kidID, totalSavings, balance);
                         await db.updateTransaction(transaction.id, 'Completed');
+                        await db.commitTransaction();
                         res.sendStatus(200);
                     }
                 }
-            }catch(error){console.log('Webhook: ', error)}
+            }catch(error){
+                await db.rollbackTransaction();
+                await db.release();
+                console.log('Database Error: ', error)
+            }
         }
     }
+    res.sendStatus(404);
 });
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)

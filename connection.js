@@ -20,6 +20,22 @@ const pool = ENV === 'prod' ? new Pool({
   port: 5432,
 }));
 
+const beginTransaction = async () => {
+  return pool.query('BEGIN');
+}
+
+const commitTransaction = async () => {
+  return pool.query('COMMIT');
+}
+
+const rollbackTransaction = async () => {
+  return pool.query('ROLLBACK');
+}
+
+const release = async () => {
+  return pool.release();
+}
+
 const getTransactionByReference = async (reference) => {
   return pool.query('SELECT * FROM transactions WHERE reference = $1', [reference]);
 }
@@ -40,7 +56,7 @@ const updateSaving = async (target, ID, savings, balance) => {
   if(target === 'member')
     return pool.query('UPDATE groups_' + target + 's SET total_savings = $2, balance = $3 WHERE id = $1', [ID, savings, balance]);
   else
-  return pool.query('UPDATE ' + target + 's SET total_savings = $2, balance = $3 WHERE id = $1', [ID, savings, balance]);
+    return pool.query('UPDATE ' + target + 's SET total_savings = $2, balance = $3 WHERE id = $1', [ID, savings, balance]);
 }
 
 const updateTransaction = async (ID, status) => {
@@ -92,4 +108,8 @@ module.exports = {
   getTotalWithdrawal,
   updateSaving,
   updateTransaction,
+  beginTransaction,
+  commitTransaction,
+  rollbackTransaction,
+  release
 }
