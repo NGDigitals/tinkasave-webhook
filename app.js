@@ -26,12 +26,12 @@ app.post("/webhook/paystack", async (req, res) => {
                         let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                         let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                 interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                        console.log('All: ', savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, balance)
-                        // await db.beginTransaction();
-                        // await db.updateSaving(target, buddieID, totalSavings, balance);
+                        console.log('All: ', buddieID, totalSavings, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, balance)
+                        await db.beginTransaction();
+                        await db.updateSaving(target, buddieID, totalSavings, balance);
                         await db.updateTransaction(transaction.id, 'Completed');
-                        // await db.commitTransaction();
-                        // res.sendStatus(200);
+                        await db.commitTransaction();
+                        res.sendStatus(200);
                     }else if(transaction.group_id !== null){
                         let target = 'member';
                         const memberID = transaction.member_id;
@@ -87,7 +87,7 @@ app.post("/webhook/paystack", async (req, res) => {
                 }
             }catch(error){
                 await db.rollbackTransaction();
-                await db.release();
+                // await db.release();
                 console.log('Database Error: ', error)
             }
         }
