@@ -18,7 +18,7 @@ app.post("/webhook/paystack", async (req, res) => {
                 if(response.rows){
                     const transaction = response.rows[0];
                     if(transaction !== undefined){
-                        if(transaction.buddie_id !== null){
+                        if(transaction.buddie_id !== null && transaction.status !== 'Completed'){
                             const target = 'buddie';
                             const buddieID = transaction.buddie_id;
                             let savings = await db.getTotalSavings(target, buddieID);
@@ -26,11 +26,11 @@ app.post("/webhook/paystack", async (req, res) => {
                             let interest = await db.getTotalInterest(target, buddieID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            console.log('Testing: ', buddieID, totalSavings, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, balance)
+                                    interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                            console.log('Testing: ', totalSavings, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, balance)
                             await db.beginTransaction();
                             console.log('Testing...1');
-                            await db.updateSaving(target, buddieID, totalSavings, balance);
+                            // await db.updateSaving(target, buddieID, totalSavings, balance);
                             console.log('Testing...2');
                             // await db.updateTransaction(transaction.id, 'Completed');
                             console.log('Testing...3');
@@ -38,7 +38,7 @@ app.post("/webhook/paystack", async (req, res) => {
                             console.log('Testing...4');
                             res.sendStatus(200);
                             console.log('Testing...5');
-                        }else if(transaction.group_id !== null){
+                        }else if(transaction.group_id !== null && transaction.status !== 'Completed'){
                             let target = 'member';
                             const memberID = transaction.member_id;
                             let savings = await db.getTotalSavings(target, memberID);
@@ -61,7 +61,7 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateTransaction(transaction.id, 'Completed');
                             // await db.commitTransaction();
                             res.sendStatus(200);
-                        }else if(transaction.smooth_id !== null){
+                        }else if(transaction.smooth_id !== null && transaction.status !== 'Completed'){
                             const target = 'smooth';
                             const smoothID = transaction.smooth_id;
                             let savings = await db.getTotalSavings(target, smoothID);
@@ -75,7 +75,7 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateTransaction(transaction.id, 'Completed');
                             // await db.commitTransaction();
                             res.sendStatus(200);
-                        }else if(transaction.kid_id !== null){
+                        }else if(transaction.kid_id !== null && transaction.status !== 'Completed'){
                             const target = 'kid';
                             const kidID = transaction.kid_id;
                             let savings = await db.getTotalSavings(target, kidID);
