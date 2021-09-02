@@ -37,6 +37,7 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.commitTransaction();
                             console.log('Testing...4');
                             res.sendStatus(200);
+                            console.log('Testing...5');
                         }else if(transaction.group_id !== null){
                             let target = 'member';
                             const memberID = transaction.member_id;
@@ -100,7 +101,7 @@ app.post("/webhook/paystack", async (req, res) => {
             }
         }
     }
-    res.sendStatus(404);
+    // res.sendStatus(404);
 });
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
