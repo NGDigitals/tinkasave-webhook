@@ -30,9 +30,9 @@ app.post("/webhook/paystack", async (req, res) => {
                             console.log('Testing: ', totalSavings, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, balance)
                             await db.beginTransaction();
                             console.log('Testing...1');
-                            // await db.updateSaving(target, buddieID, totalSavings, balance);
+                            await db.updateSaving(target, buddieID, totalSavings, balance);
                             console.log('Testing...2');
-                            // await db.updateTransaction(transaction.id, 'Completed');
+                            await db.updateTransaction(transaction.id, 'Completed');
                             console.log('Testing...3');
                             await db.commitTransaction();
                             console.log('Testing...4');
