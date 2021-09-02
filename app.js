@@ -89,6 +89,8 @@ app.post("/webhook/paystack", async (req, res) => {
                             // await db.commitTransaction();
                             res.sendStatus(200);
                         }
+                    }else{
+                        console.log('Its undefined')
                     }
                 }
             }catch(error){
