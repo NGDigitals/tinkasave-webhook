@@ -28,9 +28,13 @@ app.post("/webhook/paystack", async (req, res) => {
                                 interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
                         console.log('All: ', buddieID, totalSavings, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, balance)
                         await db.beginTransaction();
+                        console.log('Testing...1');
                         await db.updateSaving(target, buddieID, totalSavings, balance);
+                        console.log('Testing...2');
                         await db.updateTransaction(transaction.id, 'Completed');
+                        console.log('Testing...3');
                         await db.commitTransaction();
+                        console.log('Testing...4');
                         res.sendStatus(200);
                     }else if(transaction.group_id !== null){
                         let target = 'member';
