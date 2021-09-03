@@ -27,17 +27,11 @@ app.post("/webhook/paystack", async (req, res) => {
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            console.log('Testing: ', totalSavings, savings.rows[0].sum, withdrawal.rows[0].sum, interest.rows[0].sum, balance)
                             await db.beginTransaction();
-                            console.log('Testing...1');
                             await db.updateSaving(target, buddieID, totalSavings, balance);
-                            console.log('Testing...2');
                             await db.updateTransaction(transaction.id, 'Completed');
-                            console.log('Testing...3');
                             await db.commitTransaction();
-                            console.log('Testing...4');
                             res.sendStatus(200);
-                            console.log('Testing...5');
                         }else if(transaction.group_id !== null && transaction.status !== 'Completed'){
                             let target = 'member';
                             const memberID = transaction.member_id;
@@ -46,9 +40,9 @@ app.post("/webhook/paystack", async (req, res) => {
                             let interest = await db.getTotalInterest(target, memberID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            // await db.beginTransaction();
-                            // await db.updateSaving(target, memberID, totalSavings, balance);
+                                    interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                            await db.beginTransaction();
+                            await db.updateSaving(target, memberID, totalSavings, balance);
                             target = 'group';
                             const groupID = transaction.group_id;
                             savings = await db.getTotalSavings(target, groupID);
@@ -57,9 +51,9 @@ app.post("/webhook/paystack", async (req, res) => {
                             totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                             balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            // await db.updateSaving(target, groupID, totalSavings, balance);
+                            await db.updateSaving(target, groupID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
-                            // await db.commitTransaction();
+                            await db.commitTransaction();
                             res.sendStatus(200);
                         }else if(transaction.smooth_id !== null && transaction.status !== 'Completed'){
                             const target = 'smooth';
@@ -69,11 +63,11 @@ app.post("/webhook/paystack", async (req, res) => {
                             let interest = await db.getTotalInterest(target, smoothID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                                    interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
                             await db.beginTransaction();      
-                            // await db.updateSaving(target, smoothID, totalSavings, balance);
+                            await db.updateSaving(target, smoothID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
-                            // await db.commitTransaction();
+                            await db.commitTransaction();
                             res.sendStatus(200);
                         }else if(transaction.kid_id !== null && transaction.status !== 'Completed'){
                             const target = 'kid';
@@ -83,25 +77,28 @@ app.post("/webhook/paystack", async (req, res) => {
                             let interest = await db.getTotalInterest(target, kidID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
-                                    interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            // await db.beginTransaction();
-                            // await db.updateSaving(target, kidID, totalSavings, balance);
+                                    interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                            await db.beginTransaction();
+                            await db.updateSaving(target, kidID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
-                            // await db.commitTransaction();
+                            await db.commitTransaction();
                             res.sendStatus(200);
-                        }
-                    }else{
-                        console.log('Its undefined')
-                    }
-                }
+                        }else
+                            res.sendStatus(404);
+                    }else
+                        res.sendStatus(404);
+                }else
+                    res.sendStatus(404);
             }catch(error){
                 await db.rollbackTransaction();
                 // await db.release();
                 console.log('Database Error: ', error)
+                res.sendStatus(404);
             }
-        }
-    }
-    // res.sendStatus(404);
+        }else
+            res.sendStatus(404);
+    }else
+        res.sendStatus(401);
 });
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
