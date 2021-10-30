@@ -3,7 +3,7 @@ const ENV = 'test'
 const pool = ENV === 'prod' ? new Pool({
   user: 'TinkaMaster',
   host: 'tinkasave.cgmthkmsj5zb.eu-west-2.rds.amazonaws.com',
-  database: 'tinkasave',
+  database: 'tinkasave-prod',
   password: 'Cistern#_1',
   port: 5432,
 }) : (ENV === 'test' ? new Pool({
