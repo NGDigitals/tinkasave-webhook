@@ -9,32 +9,43 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.post("/webhook/paystack", async (req, res) => {
     const json = req.body;
+    console.log(`JSON Received ${json}.`)
     var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
     if (hash == req.headers['x-paystack-signature']) {
         if(json.event == 'charge.success'){
             try{
                 const reference = json.data.reference;
+                console.log(`Data Ref ${reference}.`)
                 const response = await db.getTransactionByReference(reference);
+                console.log(`Data Response ${response}.`)
                 if(response.rows){
                     const transaction = response.rows[0];
+                    console.log(`Data Trans ${transaction}.`)
                     if(transaction !== undefined){
+                        console.log(`Updating Trans...`)
                         if(transaction.buddie_id !== null && transaction.status !== 'Completed'){
+                            console.log(`Updating Buddie...1`)
                             const target = 'buddie';
                             const buddieID = transaction.buddie_id;
                             let savings = await db.getTotalSavings(target, buddieID);
                             let withdrawal = await db.getTotalWithdrawal(target, buddieID);
+                            console.log(`Updating Buddie...2`)
                             // let interest = await db.getTotalInterest(target, buddieID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                            console.log(`Updating Buddie...3`)
                             // let totalWithdrawal = 
                             //     withdrawal.rows[0].sum != null ? 
                             //     (withdrawal.rows[0].sum < 0 ? withdrawal.rows[0].sum : -withdrawal.rows[0].sum) : 0
                             // let balance = totalSavings + totalWithdrawal;
                             let balance = totalSavings + /*(interest.rows[0].sum !== null ? 
                                 interest.rows[0].sum : 0)) +*/ (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                                console.log(`Updating Buddie...3`)
                             await db.beginTransaction();
                             await db.updateSaving(target, buddieID, totalSavings, balance);
+                            console.log(`Updating Buddie...4`)
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
+                            console.log(`Updating Buddie...5`)
                             res.sendStatus(200);
                         }else if(transaction.group_id !== null && transaction.status !== 'Completed'){
                             let target = 'member';
