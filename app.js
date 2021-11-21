@@ -9,6 +9,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.post("/webhook/paystack", async (req, res) => {
     const json = req.body;
+    console.log('Starting....');
     // var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
     // if (hash == req.headers['x-paystack-signature']) {
         try{
@@ -17,7 +18,8 @@ app.post("/webhook/paystack", async (req, res) => {
             if(response.rows){
                 const transaction = response.rows[0];
                 if(transaction !== undefined){
-                    if(json.event == 'charge.success'){
+                    console.log('Starting event....', json.event)
+                    if(json.event === 'charge.success'){
                         if(transaction.buddie_id !== null /*&& transaction.status !== 'Completed'*/){
                             const target = 'buddie';
                             const buddieID = transaction.buddie_id;
@@ -100,7 +102,7 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
                         }
-                    }else if(json.event == 'charge.failed'){
+                    }else if(json.event === 'charge.failed'){
                         await db.updateTransaction(transaction.id, 'Failed');
                     }
                     res.sendStatus(200);
