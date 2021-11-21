@@ -9,16 +9,14 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.post("/webhook/paystack", async (req, res) => {
     const json = req.body;
-    console.log('Starting....');
-    // var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
-    // if (hash == req.headers['x-paystack-signature']) {
+    var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
+    if (hash == req.headers['x-paystack-signature']) {
         try{
             const reference = json.data.reference;
             const response = await db.getTransactionByReference(reference);
             if(response.rows){
                 const transaction = response.rows[0];
                 if(transaction !== undefined){
-                    console.log('Starting event....', json.event)
                     if(json.event === 'charge.success'){
                         if(transaction.buddie_id !== null /*&& transaction.status !== 'Completed'*/){
                             const target = 'buddie';
@@ -116,8 +114,8 @@ app.post("/webhook/paystack", async (req, res) => {
             // await db.release();
             res.sendStatus(404);
         }
-    // }else
-    //     res.sendStatus(401);
+    }else
+        res.sendStatus(401);
 });
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
