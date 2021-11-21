@@ -46,7 +46,6 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
                             console.log(`Updating Buddie...5`)
-                            res.sendStatus(200);
                         }else if(transaction.group_id !== null && transaction.status !== 'Completed'){
                             let target = 'member';
                             const memberID = transaction.member_id;
@@ -77,8 +76,7 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateSaving(target, groupID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
-                            res.sendStatus(200);
-                        }else if(transaction.smooth_id !== null && transaction.status !== 'Completed'){
+                        }else if(transaction.smooth_id !== null /*&& transaction.status !== 'Completed'*/){
                             const target = 'smooth';
                             const smoothID = transaction.smooth_id;
                             let savings = await db.getTotalSavings(target, smoothID);
@@ -95,7 +93,6 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateSaving(target, smoothID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
-                            res.sendStatus(200);
                         }else if(transaction.kid_id !== null && transaction.status !== 'Completed'){
                             const target = 'kid';
                             const kidID = transaction.kid_id;
@@ -113,9 +110,8 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateSaving(target, kidID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
-                            res.sendStatus(200);
-                        }else
-                            res.sendStatus(404);
+                        }
+                        res.sendStatus(200);
                     }else
                         res.sendStatus(404);
                 }else
