@@ -13,13 +13,10 @@ app.post("/webhook/paystack", async (req, res) => {
     if (hash == req.headers['x-paystack-signature']) {
         try{
             const reference = json.data.reference;
-            console.log(`Referemce ${reference}.`)
             const response = await db.getTransactionByReference(reference);
             if(response.rows){
                 const transaction = response.rows[0];
-                console.log(`Referemce...${transaction}`)
                 if(transaction !== undefined){
-                    console.log(`Referemce...${json.event}`)
                     if(json.event === 'charge.success'){
                         if(transaction.buddie_id !== null /*&& transaction.status !== 'Completed'*/){
                             const target = 'buddie';
