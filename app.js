@@ -99,7 +99,8 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateSaving(target, kidID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
-                        }
+                        }else
+                            await db.updateTransaction(transaction.id, 'Completed');
                     }else if(json.event === 'charge.failed'){
                         await db.updateTransaction(transaction.id, 'Failed');
                     }
