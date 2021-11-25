@@ -54,7 +54,9 @@ const getTotalInterest = async (target, ID) => {
 
 const updateSaving = async (target, ID, savings, balance) => {
   if(target === 'member')
-    return pool.query('UPDATE groups_' + target + 's SET total_savings = $2, balance = $3 WHERE id = $1', [ID, savings, balance]);
+    return pool.query('UPDATE groups_members SET total_savings = $2, balance = $3 WHERE id = $1', [ID, savings, balance]);
+  else if(target === 'group')
+    return pool.query('UPDATE groups SET total_savings = $2 WHERE id = $1', [ID, savings]);
   else
     return pool.query('UPDATE ' + target + 's SET total_savings = $2, balance = $3 WHERE id = $1', [ID, savings, balance]);
 }
