@@ -48,7 +48,6 @@ app.post("/webhook/paystack", async (req, res) => {
                             // let balance = totalSavings + interest + totalWithdrawal;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0);
-                            console.log('Member: ', memberID, totalSavings, transaction.amount, balance)
                             await db.beginTransaction();
                             await db.updateSaving(target, memberID, totalSavings, balance);
                             target = 'group';
@@ -63,7 +62,6 @@ app.post("/webhook/paystack", async (req, res) => {
                             // balance = totalSavings + interest + totalWithdrawal;
                             balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
-                            console.log('Group: ', groupID, totalSavings, transaction.amount, balance);
                             await db.updateSaving(target, groupID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
