@@ -9,33 +9,38 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.post("/webhook/paystack", async (req, res) => {
     const json = req.body;
+    console.log(`Updating... ${json}.`)
     var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
     if (hash == req.headers['x-paystack-signature']) {
         try{
             const reference = json.data.reference;
+            console.log(`Reference ${reference}`)
             const response = await db.getTransactionByReference(reference);
             if(response.rows){
                 const transaction = response.rows[0];
+                console.log(`Updating...1`)
                 if(transaction !== undefined){
                     if(json.event === 'charge.success'){
                         if(transaction.buddie_id !== null && transaction.status !== 'Completed'){
+                            console.log(`Updating...Buddie`)
                             const target = 'buddie';
                             const buddieID = transaction.buddie_id;
                             let savings = await db.getTotalSavings(target, buddieID);
                             let withdrawal = await db.getTotalWithdrawal(target, buddieID);
-                            // let interest = await db.getTotalInterest(target, buddieID);
+                            let interest = await db.getTotalInterest(target, buddieID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
                             // let totalWithdrawal = 
                             //     withdrawal.rows[0].sum != null ? 
                             //     (withdrawal.rows[0].sum < 0 ? withdrawal.rows[0].sum : -withdrawal.rows[0].sum) : 0
                             // let balance = totalSavings + totalWithdrawal;
-                            let balance = totalSavings + /*(interest.rows[0].sum !== null ? 
-                                interest.rows[0].sum : 0)) +*/ (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                            let balance = (totalSavings /*+ (interest.rows[0].sum !== null ? 
+                                interest.rows[0].sum : 0)*/) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
                             await db.beginTransaction();
                             await db.updateSaving(target, buddieID, totalSavings, balance);
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
                         }else if(transaction.group_id !== null && transaction.status !== 'Completed'){
+                            console.log(`Updating...Group`)
                             let target = 'member';
                             const memberID = transaction.member_id;
                             let savings = await db.getTotalSavings(target, memberID);
@@ -66,6 +71,7 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
                         }else if(transaction.smooth_id !== null && transaction.status !== 'Completed'){
+                            console.log(`Updating...SMooth`)
                             const target = 'smooth';
                             const smoothID = transaction.smooth_id;
                             let savings = await db.getTotalSavings(target, smoothID);
@@ -83,6 +89,7 @@ app.post("/webhook/paystack", async (req, res) => {
                             await db.updateTransaction(transaction.id, 'Completed');
                             await db.commitTransaction();
                         }else if(transaction.kid_id !== null && transaction.status !== 'Completed'){
+                            console.log(`Updating...Kid`)
                             const target = 'kid';
                             const kidID = transaction.kid_id;
                             let savings = await db.getTotalSavings(target, kidID);
@@ -102,6 +109,7 @@ app.post("/webhook/paystack", async (req, res) => {
                         }else
                             await db.updateTransaction(transaction.id, 'Completed');
                     }else if(json.event === 'charge.failed'){
+                        console.log(`Updating...Failed`)
                         await db.updateTransaction(transaction.id, 'Failed');
                     }
                     res.sendStatus(200);
