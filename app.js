@@ -19,17 +19,39 @@ app.post("/webhook/paystack", async (req, res) => {
                 const transaction = response.rows[0];
                 if(transaction !== undefined){
                     if(json.event === 'charge.success'){
-                        if(transaction.buddie_id !== null && transaction.status !== 'Completed'){
+                        if(transaction.airtime_id !== null && transaction.status !== 'Completed'){
+                            const target = 'airtime';
+                            const airtimeID = transaction.airtime_id;
+                            let savings = await db.getTotalSavings(target, airtimeID);
+                            let withdrawal = await db.getTotalWithdrawal(target, airtimeID);
+                            let interest = await db.getTotalInterest(target, airtimeID);
+                            let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                            let balance = (totalSavings + (interest.rows[0].sum !== null ? 
+                                interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                            await db.beginTransaction();
+                            await db.updateSaving(target, airtimeID, totalSavings, balance);
+                            await db.updateTransaction(transaction.id, 'Completed');
+                            await db.commitTransaction();
+                        }else if(transaction.atm_id !== null && transaction.status !== 'Completed'){
+                            const target = 'atm';
+                            const atmID = transaction.atm_id;
+                            let savings = await db.getTotalSavings(target, atmID);
+                            let withdrawal = await db.getTotalWithdrawal(target, atmID);
+                            let interest = await db.getTotalInterest(target, atmID);
+                            let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
+                            let balance = (totalSavings + (interest.rows[0].sum !== null ? 
+                                interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
+                            await db.beginTransaction();
+                            await db.updateSaving(target, atmID, totalSavings, balance);
+                            await db.updateTransaction(transaction.id, 'Completed');
+                            await db.commitTransaction();
+                        }else if(transaction.buddie_id !== null && transaction.status !== 'Completed'){
                             const target = 'buddie';
                             const buddieID = transaction.buddie_id;
                             let savings = await db.getTotalSavings(target, buddieID);
                             let withdrawal = await db.getTotalWithdrawal(target, buddieID);
                             let interest = await db.getTotalInterest(target, buddieID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            // let totalWithdrawal = 
-                            //     withdrawal.rows[0].sum != null ? 
-                            //     (withdrawal.rows[0].sum < 0 ? withdrawal.rows[0].sum : -withdrawal.rows[0].sum) : 0
-                            // let balance = totalSavings + totalWithdrawal;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                 interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
                             await db.beginTransaction();
@@ -43,10 +65,6 @@ app.post("/webhook/paystack", async (req, res) => {
                             let withdrawal = await db.getTotalWithdrawal(target, memberID);
                             let interest = await db.getTotalInterest(target, memberID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            // let totalWithdrawal = 
-                            //     withdrawal.rows[0].sum != null ? 
-                            //     (withdrawal.rows[0].sum < 0 ? withdrawal.rows[0].sum : -withdrawal.rows[0].sum) : 0
-                            // let balance = totalSavings + interest + totalWithdrawal;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0);
                             await db.beginTransaction();
@@ -57,10 +75,6 @@ app.post("/webhook/paystack", async (req, res) => {
                             withdrawal = await db.getTotalWithdrawal(target, groupID);
                             interest = await db.getTotalInterest(target, groupID);
                             totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            // totalWithdrawal = 
-                            //     withdrawal.rows[0].sum != null ? 
-                            //     (withdrawal.rows[0].sum < 0 ? withdrawal.rows[0].sum : -withdrawal.rows[0].sum) : 0
-                            // balance = totalSavings + interest + totalWithdrawal;
                             balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) - (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
                             await db.updateSaving(target, groupID, totalSavings, balance);
@@ -73,10 +87,6 @@ app.post("/webhook/paystack", async (req, res) => {
                             let withdrawal = await db.getTotalWithdrawal(target, smoothID);
                             let interest = await db.getTotalInterest(target, smoothID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            // let totalWithdrawal = 
-                            //     withdrawal.rows[0].sum != null ? 
-                            //     (withdrawal.rows[0].sum < 0 ? withdrawal.rows[0].sum : -withdrawal.rows[0].sum) : 0
-                            // let balance = totalSavings + interest + totalWithdrawal;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
                             await db.beginTransaction();      
@@ -90,10 +100,6 @@ app.post("/webhook/paystack", async (req, res) => {
                             let withdrawal = await db.getTotalWithdrawal(target, kidID);
                             let interest = await db.getTotalInterest(target, kidID);
                             let totalSavings = (savings.rows[0].sum !== null ? savings.rows[0].sum : 0) + transaction.amount;
-                            // let totalWithdrawal = 
-                            //     withdrawal.rows[0].sum != null ? 
-                            //     (withdrawal.rows[0].sum < 0 ? withdrawal.rows[0].sum : -withdrawal.rows[0].sum) : 0
-                            // let balance = totalSavings + interest + totalWithdrawal;
                             let balance = (totalSavings + (interest.rows[0].sum !== null ? 
                                     interest.rows[0].sum : 0)) + (withdrawal.rows[0].sum != null ? withdrawal.rows[0].sum : 0)
                             await db.beginTransaction();
