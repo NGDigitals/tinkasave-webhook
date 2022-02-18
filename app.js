@@ -4,9 +4,11 @@ const db = require('./connection');
 const express = require('express')
 const bodyParser = require('body-parser');
 const port = 8080
+console.log(`Starting...1`)
 var app = express();
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
+console.log(`Starting...2`)
 app.post("/webhook/paystack", async (req, res) => {
     const json = req.body;
     var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
@@ -125,6 +127,7 @@ app.post("/webhook/paystack", async (req, res) => {
     }else
         res.sendStatus(401);
 });
+console.log(`Starting...3`)
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
 })
