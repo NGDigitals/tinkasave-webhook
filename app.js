@@ -14,7 +14,6 @@ app.post("/webhook/paystack", async (req, res) => {
     if (hash == req.headers['x-paystack-signature']) {
         try{
             const reference = json.data.reference;
-            console.log(`Reference ${reference}`)
             const response = await db.getTransactionByReference(reference);
             if(response.rows){
                 const transaction = response.rows[0];
@@ -125,6 +124,9 @@ app.post("/webhook/paystack", async (req, res) => {
         }
     }else
         res.sendStatus(401);
+});
+app.post("/", async (req, res) => {
+    res.sendStatus(200);
 });
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
