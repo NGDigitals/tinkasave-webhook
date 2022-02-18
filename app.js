@@ -9,9 +9,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.post("/webhook/paystack", async (req, res) => {
     console.log(`Starting...1`)
-    const json = req.body;
-    var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
-    console.log(`Starting...${hash}`);
+    // const json = req.body;
+    // var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
+    // console.log(`Starting...${hash}`);
     // if (hash == req.headers['x-paystack-signature']) {
     //     try{
     //         const reference = json.data.reference;
@@ -125,7 +125,7 @@ app.post("/webhook/paystack", async (req, res) => {
     //         res.sendStatus(404);
     //     }
     // }else
-        res.sendStatus(401);
+        // res.sendStatus(401);
 });
 app.listen(port, () => {
     console.log(`App running on port ${port}.`)
