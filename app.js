@@ -3,7 +3,7 @@ var secret = 'sk_live_6f302e970dd45ae4164a338c3867986f3571203e';//process.env.SE
 const db = require('./connection');
 const express = require('express')
 const bodyParser = require('body-parser');
-const port = 80
+const port = 8080
 var app = express();
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
