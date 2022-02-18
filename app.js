@@ -10,7 +10,6 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.post("/webhook/paystack", async (req, res) => {
     const json = req.body;
     var hash = crypto.createHmac('sha512', secret).update(JSON.stringify(json)).digest('hex');
-    console.log(`Starting...${hash}`);
     if (hash == req.headers['x-paystack-signature']) {
         try{
             const reference = json.data.reference;
