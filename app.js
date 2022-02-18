@@ -124,7 +124,7 @@ app.post("/webhook/paystack", async (req, res) => {
     }else
         res.sendStatus(401);
 });
-app.post("/", async (req, res) => {
+app.get("/", async (req, res) => {
     res.sendStatus(200);
 });
 app.listen(port, () => {
